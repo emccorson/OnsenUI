@@ -5,7 +5,7 @@
 (function(){
   'use strict';
 
-  angular.module('onsen').directive('onsInput', function($parse) {
+  angular.module('onsen').directive('onsInput', function($parse, $timeout) {
     return {
       restrict: 'E',
       replace: false,
@@ -13,6 +13,7 @@
 
       link: function(scope, element, attrs) {
         let el = element[0];
+        var debounce;
 
         const onInput = () => {
           $parse(attrs.ngModel).assign(scope, el.type === 'number' ? Number(el.value) : el.value);
@@ -27,7 +28,12 @@
             }
           });
 
-          element.on('input', onInput)
+          element.on('input', () => {
+            debounce && $timeout.cancel(debounce);
+            const bouncy = attrs.ngModelOptions.debounce ? $parse(attrs.ngModelOptions)().debounce : 0;
+            console.log("bouncing with " + bouncy);
+            debounce = $timeout(onInput, bouncy);
+          });
         }
 
         scope.$on('$destroy', () => {
