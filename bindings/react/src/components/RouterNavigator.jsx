@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
 /**
@@ -11,9 +10,9 @@ import Util from './Util.js';
  * [en] This component is a variant of the Navigator with a declarative API. In order to manage to display the pages, the  navigator needs to define the `renderPage` method, that takes an route and a navigator and  converts it to an page.[/en]
  * [ja][/ja]
  */
-class RouterNavigator extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class RouterNavigator extends React.Component {
+  constructor(props) {
+    super(props);
 
     this.cancelUpdate = false;
     this.page = null;
@@ -247,14 +246,14 @@ class RouterNavigator extends BasicComponent {
   }
 
   render() {
-    const attrs = Util.getAttrs(this);
+    const { className, ...attrs } = Util.getAttrs(this);
 
     /* Gather pages to render and the animating page in one array so React reuses components. */
     const pagesToRender = this.props.routeConfig.routeStack.map(route => this.props.renderPage(route));
     pagesToRender.push(this.page);
 
     return (
-      <ons-navigator { ...attrs } ref={(navi) => { this._navi = navi; }}>
+      <ons-navigator class={ className } { ...attrs } ref={(navi) => { this._navi = navi; }}>
         {pagesToRender}
       </ons-navigator>
     );

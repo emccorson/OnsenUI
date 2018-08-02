@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
 /**
@@ -24,9 +23,9 @@ import Util from './Util.js';
    }
  }
  */
-class Navigator extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class Navigator extends React.Component {
+  constructor(props) {
+    super(props);
     this.pages = [];
     this.state = { };
     this._prePush = this._prePush.bind(this);
@@ -323,11 +322,11 @@ class Navigator extends BasicComponent {
   }
 
   render() {
-    const attrs = Util.getAttrs(this);
+    const { className, ...attrs } = Util.getAttrs(this);
     const pages = this.routes ? this.routes.map((route) => this.props.renderPage(route, this)) : null;
 
     return (
-      <ons-navigator { ...attrs } ref={(navi) => { this._navi = navi; }}>
+      <ons-navigator class={ className } { ...attrs } ref={(navi) => { this._navi = navi; }}>
         {pages}
       </ons-navigator>
     );

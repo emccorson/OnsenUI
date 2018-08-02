@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
 /**
@@ -33,9 +32,9 @@ import Util from './Util.js';
   </Page>
  */
 
-class Tabbar extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class Tabbar extends React.Component {
+  constructor(props) {
+    super(props);
 
     const callback = (name, event) => {
       if (this.props[name]) {
@@ -48,7 +47,6 @@ class Tabbar extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     const node = this._tabbar;
     node.addEventListener('prechange', this.onPreChange);
     node.addEventListener('postchange', this.onPostChange);
@@ -80,7 +78,7 @@ class Tabbar extends BasicComponent {
   }
 
   render() {
-    const attrs = Util.getAttrs(this, this.props, { index: 'activeIndex' });
+    const { className, ...attrs } = Util.getAttrs(this, this.props, { index: 'activeIndex' });
     const tabs = this.props.renderTabs(this.props.index, this);
 
     if (!this.tabPages) {
@@ -90,7 +88,7 @@ class Tabbar extends BasicComponent {
     }
 
     return (
-      <ons-tabbar {...attrs} ref={(tabbar) => { this._tabbar = tabbar; }}>
+      <ons-tabbar {...attrs} ref={(tabbar) => { this._tabbar = tabbar; }} class={className}>
         <div className={'tabbar__content'}>
           <div>
             {this.tabPages}

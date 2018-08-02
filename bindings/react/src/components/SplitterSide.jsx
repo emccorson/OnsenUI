@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
 /**
@@ -37,9 +36,9 @@ import Util from './Util.js';
   </Splitter>
  */
 
-class SplitterSide extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class SplitterSide extends React.Component {
+  constructor(props) {
+    super(props);
 
     const callback = (name, event) => {
       if (this.props[name]) {
@@ -54,7 +53,6 @@ class SplitterSide extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     this.node = ReactDOM.findDOMNode(this);
     this.componentWillReceiveProps(this.props);
 
@@ -86,11 +84,11 @@ class SplitterSide extends BasicComponent {
       `The property '${p}' is deprecated, please use '${p.toLowerCase().slice(2)}', see https://onsen.io/v2/docs/react/SplitterSide.html.`
     ));
 
-    const { isOpen, ...props } = this.props;
+    const { isOpen, className, ...props } = this.props;
     const attrs = Util.getAttrs(this, props);
 
     return (
-      <ons-splitter-side { ...attrs } >
+      <ons-splitter-side class={ className } { ...attrs } >
         {this.props.children}
       </ons-splitter-side>
     );

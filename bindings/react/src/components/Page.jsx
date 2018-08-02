@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
 /**
@@ -25,9 +24,9 @@ import Util from './Util.js';
     <div> Page content </div>
   </Page>
  */
-class Page extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class Page extends React.Component {
+  constructor(props) {
+    super(props);
 
     const callback = (name, event) => {
       if (this.props[name]) {
@@ -40,7 +39,6 @@ class Page extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     const node = ReactDOM.findDOMNode(this);
     node.addEventListener('init', this.onInit);
     node.addEventListener('show', this.onShow);
@@ -76,10 +74,10 @@ class Page extends BasicComponent {
     const modal = this.props.renderModal(this);
     const fixed = this.props.renderFixed(this);
 
-    const {contentStyle, ...other} = this.props;
+    const {contentStyle, className, ...other} = this.props;
     const attrs = Util.getAttrs(this, other);
 
-    return <ons-page {...attrs} >
+    return <ons-page class={className} {...attrs} >
       {toolbar}
       <div className='page__background'> </div>
       <div className='page__content' style={contentStyle}>

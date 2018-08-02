@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BasicComponent from './BasicComponent.jsx';
 
 /**
  * @original ons-lazy-repeat
@@ -41,9 +40,9 @@ import BasicComponent from './BasicComponent.jsx';
   }
 }
  */
-class LazyList extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class LazyList extends React.Component {
+  constructor(props) {
+    super(props);
     this.state = {children: []};
     this.update = this.update.bind(this);
   }
@@ -83,13 +82,13 @@ class LazyList extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     this.update(this.props);
   }
 
   render() {
+    const { className, ...passThroughProps } = this.props;
     return (
-      <ons-list {...this.props} ref={(list) => { this._list = list; }}
+      <ons-list class={className} {...passThroughProps} ref={(list) => { this._list = list; }}
         class='list' style={{position: 'relative', height: this.state.height}}
       >
         <ons-lazy-repeat ref={(lazyRepeat) => { this._lazyRepeat = lazyRepeat; }} />

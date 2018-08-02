@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
 /**
@@ -24,13 +23,13 @@ import Util from './Util.js';
   renderFooter={this.renderFooter}
   />
  */
-class List extends BasicComponent {
+class List extends React.Component {
   render() {
     const attrs = Util.getAttrs(this);
     const pages = this.props.dataSource.map((data, idx) => this.props.renderRow(data, idx));
 
     return (
-      <ons-list { ...attrs } ref={(list) => { this._list = list; }}>
+      <ons-list { ...attrs } ref={(list) => { this._list = list; }} class={ this.props.className }>
         {this.props.renderHeader()}
         {pages}
         {this.props.children}

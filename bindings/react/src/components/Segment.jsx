@@ -1,4 +1,3 @@
-import BasicComponent from './BasicComponent.jsx';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {findDOMNode} from 'react-dom';
@@ -20,9 +19,9 @@ import Util from './Util.js';
  *  <button>Label 3</button>
  * </Segment>
  */
-class Segment extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class Segment extends React.Component {
+  constructor(props) {
+    super(props);
 
     this.onPostChange = (event) => {
       if (this.props.onPostChange) {
@@ -36,7 +35,6 @@ class Segment extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     const node = findDOMNode(this);
 
     node.addEventListener('postchange', this.onPostChange);
@@ -61,7 +59,7 @@ class Segment extends BasicComponent {
   }
 
   render() {
-    const attrs = Util.getAttrs(this, this.props, { index: 'active-index' });
+    const attrs = Util.getAttrs(this, this.props, { index: 'active-index', className: 'class' });
     return React.createElement(this._getDomNodeName(), attrs, this.props.children);
   }
 }

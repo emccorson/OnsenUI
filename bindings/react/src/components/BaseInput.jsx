@@ -1,12 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import BasicComponent from './BasicComponent.jsx';
 import Util from './Util.js';
 
-class BaseInput extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class BaseInput extends React.Component {
+  constructor(props) {
+    super(props);
 
     this.onChange = (event) => {
       if (this.props.onChange) {
@@ -20,7 +19,6 @@ class BaseInput extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     const node = ReactDOM.findDOMNode(this);
 
     if (this.props.defaultValue !== undefined) {
@@ -44,8 +42,6 @@ class BaseInput extends BasicComponent {
   }
 
   componentDidUpdate() {
-    super.componentDidUpdate();
-
     const node = ReactDOM.findDOMNode(this);
 
     if (typeof this.props.value !== 'undefined' && node.value !== this.props.value) {
@@ -59,7 +55,7 @@ class BaseInput extends BasicComponent {
 
   render() {
     const { onChange, ...props } = this.props;
-    return React.createElement(this._getDomNodeName(), Util.getAttrs(this, props));
+    return React.createElement(this._getDomNodeName(), Util.getAttrs(this, props, { className: 'class' }));
   }
 }
 

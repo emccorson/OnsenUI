@@ -1,5 +1,4 @@
 import ReactDOM from 'react-dom';
-import BasicComponent from './BasicComponent.jsx';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Util from './Util.js';
@@ -34,9 +33,9 @@ import Util from './Util.js';
       </PullHook>
     );
  */
-class PullHook extends BasicComponent {
-  constructor(...args) {
-    super(...args);
+class PullHook extends React.Component {
+  constructor(props) {
+    super(props);
 
     this.onChange = (event) => {
       if (this.props.onChange) {
@@ -46,7 +45,6 @@ class PullHook extends BasicComponent {
   }
 
   componentDidMount() {
-    super.componentDidMount();
     const node = ReactDOM.findDOMNode(this);
     node.addEventListener('changestate', this.onChange);
     this._pullHook.onAction = this.props.onLoad || null;
@@ -68,8 +66,8 @@ class PullHook extends BasicComponent {
   }
 
   render() {
-    const attrs = Util.getAttrs(this);
-    return <ons-pull-hook { ...attrs } ref={(pullHook) => { this._pullHook = pullHook; }} />;
+    const { className, ...attrs } = Util.getAttrs(this);
+    return <ons-pull-hook class={ className } { ...attrs } ref={(pullHook) => { this._pullHook = pullHook; }} />;
   }
 }
 
