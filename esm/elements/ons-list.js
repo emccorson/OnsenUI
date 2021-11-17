@@ -63,17 +63,19 @@ export default class ListElement extends BaseElement {
    *   [en]The appearance of the list.[/en]
    *   [ja]リストの表現を指定します。[/ja]
    */
-
   constructor() {
     super();
 
-    this._compile();
+    this._connectedOnce = false;
   }
 
-  _compile() {
-    autoStyle.prepare(this);
-    this.classList.add(defaultClassName);
-    ModifierUtil.initModifier(this, scheme);
+  connectedCallback() {
+    if (!this._connectedOnce) {
+      this._connectedOnce = true;
+
+      this._applyDefaultClass();
+      this._applyAutoStyling();
+    }
   }
 
   static get observedAttributes() {
@@ -83,12 +85,31 @@ export default class ListElement extends BaseElement {
   attributeChangedCallback(name, last, current) {
     switch (name) {
       case 'class':
-        util.restoreClass(this, defaultClassName, scheme);
+        this._applyDefaultClass();
         break;
       case 'modifier':
-        ModifierUtil.onModifierChanged(last, current, this, scheme);
+        this._applyModifier(last, current);
         break;
     }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // METHODS
+  ////////////////////////////////////////////////////////////////////////////////
+
+  _applyDefaultClass() {
+    if (!this.classList.contains(defaultClassName)) {
+      this.classList.add(defaultClassName);
+    }
+  }
+
+  _applyModifier(last, current) {
+    ModifierUtil.onModifierChanged(last, current, this, scheme);
+    autoStyle.restoreModifier(this);
+  }
+
+  _applyAutoStyling() {
+    autoStyle.prepare(this);
   }
 }
 
