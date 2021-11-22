@@ -417,6 +417,21 @@ export default class TabElement extends BaseElement {
 
   _compile() {
 
+    // INPUT
+
+    let [input, ...furtherInputs] = this.querySelectorAll(':scope > input');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'radio';
+      input.style.display = 'none';
+      this.appendChild(input);
+    }
+
+    furtherInputs.forEach(node => node.remove());
+
+    this._inputElement = input;
+
+
     // BUTTON
 
     let button;
@@ -439,24 +454,9 @@ export default class TabElement extends BaseElement {
       this._automaticallyAddedButton = button;
     }
 
-
-    // INPUT
-
-    let [input, ...furtherInputs] = this.querySelectorAll(':scope > input');
-    if (!input) {
-      input = document.createElement('input');
-      input.type = 'radio';
-      input.style.display = 'none';
-      this.appendChild(input);
-    }
-
-    furtherInputs.forEach(node => node.remove());
-
     Array.from(this.childNodes)
       .filter(node => node !== button && node !== input)
       .forEach(node => button.appendChild(node));
-
-    this._inputElement = input;
 
 
     // ICON
