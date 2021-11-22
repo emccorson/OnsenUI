@@ -304,7 +304,7 @@ export default class ListItemElement extends BaseElement {
   }
 
   _applyModifier(last = '') {
-    ModifierUtil.onModifierChanged(last, this.getAttribute('modifier'), this, scheme);
+    ModifierUtil.onModifierChanged(last, this.getAttribute('modifier') || '', this, scheme);
     autoStyle.restoreModifier(this);
   }
 
