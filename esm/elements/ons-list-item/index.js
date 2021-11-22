@@ -215,7 +215,7 @@ export default class ListItemElement extends BaseElement {
         this._applyDefaultClass();
         break;
       case 'modifier':
-        this._applyModifier(last, current);
+        this._applyModifier(last);
         break;
       case 'expandable':
         this.classList.toggle('list-item--expandable', this.expandable);
@@ -237,6 +237,7 @@ export default class ListItemElement extends BaseElement {
 
   _onSlotChange() {
     this._compile();
+    this._applyModifier();
     this._applyAutoStyling();
     this._setupClickListener();
   }
@@ -302,8 +303,8 @@ export default class ListItemElement extends BaseElement {
     }
   }
 
-  _applyModifier(last, current) {
-    ModifierUtil.onModifierChanged(last, current, this, scheme);
+  _applyModifier(last = '') {
+    ModifierUtil.onModifierChanged(last, this.getAttribute('modifier'), this, scheme);
     autoStyle.restoreModifier(this);
   }
 
@@ -447,18 +448,20 @@ export default class ListItemElement extends BaseElement {
       node.remove();
     });
 
-    const userAddedRightContent =
-      Array.from(right.childNodes).find(node => node !== this._automaticallyAddedChevron);
+    if (right) {
+      const userAddedRightContent =
+        Array.from(right.childNodes).find(node => node !== this._automaticallyAddedChevron);
 
-    if (this._automaticallyAddedChevron) {
-      if (userAddedRightContent) {
-        // div.right contains user-added content so only remove chevron
-        this._automaticallyAddedChevron.remove();
-        this._automaticallyAddedChevron = null;
-      } else if (!this.expandable) {
-        // div.right only contains chevron so remove whole div.right
-        this._automaticallyAddedChevron.parentNode.remove();
-        this._automaticallyAddedChevron = null;
+      if (this._automaticallyAddedChevron) {
+        if (userAddedRightContent) {
+          // div.right contains user-added content so only remove chevron
+          this._automaticallyAddedChevron.remove();
+          this._automaticallyAddedChevron = null;
+        } else if (!this.expandable) {
+          // div.right only contains chevron so remove whole div.right
+          this._automaticallyAddedChevron.parentNode.remove();
+          this._automaticallyAddedChevron = null;
+        }
       }
     }
 
