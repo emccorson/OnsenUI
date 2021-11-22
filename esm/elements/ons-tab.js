@@ -1,5 +1,3 @@
-// NEXT TIME!
-// THE CLICK STUFF?
 /*
 Copyright 2013-2015 ASIAL CORPORATION
 
@@ -206,12 +204,18 @@ export default class TabElement extends BaseElement {
       this._compile();
       this._applyAutoStyling();
     }
+
+    this._setupOnClick();
+    this._setupDefaultOnClick();
+  }
+
+  disconnectedCallback() {
+    this._setupOnClick();
+    this._setupDefaultOnClick();
   }
 
   static get observedAttributes() {
-    return ['modifier', 'class', 'icon', 'active-icon', 'active', 'label', 'badge', 'ripple'
-    //'page',
-    ];
+    return ['modifier', 'class', 'icon', 'active-icon', 'active', 'label', 'badge', 'ripple'];
   }
 
   attributeChangedCallback(name, last, current) {
@@ -284,6 +288,14 @@ export default class TabElement extends BaseElement {
   // PUBLIC METHODS
   ////////////////////////////////////////////////////////////////////////////////
 
+  get page() {
+    return this.getAttribute('page');
+  }
+
+  set page(value) {
+    this.setAttribute('page', value);
+  }
+
   get icon() {
     return this.getAttribute('icon');
   }
@@ -339,7 +351,53 @@ export default class TabElement extends BaseElement {
   _defineProperties() {
     util.defineBooleanProperty(this, 'active');
     util.defineBooleanProperty(this, 'ripple');
+    this._defineOnClickProperty();
   }
+
+  _defineOnClickProperty() {
+    let handler;
+    Object.defineProperty(this, 'onClick', {
+      get() {
+        return handler;
+      },
+      set(newHandler) {
+        this.removeEventListener('click', handler);
+        handler = newHandler;
+        this._setupOnClick();
+      }
+    });
+  }
+
+  _setupOnClick() {
+    if (this.isConnected) {
+      this.addEventListener('click', this.onClick);
+    } else {
+      this.removeEventListener('click', this.onClick);
+    }
+  }
+
+  _setupDefaultOnClick() {
+    const handler = event => {
+      setImmediate(() => {
+        if (!event.defaultPrevented) {
+          this.active = true;
+        }
+      });
+    };
+
+    if (this.isConnected) {
+      this.addEventListener('click', handler);
+    } else {
+      this.removeEventListener('click', handler);
+    }
+  }
+  //_onClick(event) {
+  //  setTimeout(() => {
+  //    if (!event.defaultPrevented) {
+  //      this._tabbar.setActiveTab(this.index, { reject: false });
+  //    }
+  //  });
+  //}
 
   _applyDefaultClass() {
     if (!this.classList.contains(defaultClassName)) {
@@ -573,6 +631,7 @@ export default class TabElement extends BaseElement {
     }
   }
 
+
   // JUNK
 
   //constructor() {
@@ -608,14 +667,6 @@ export default class TabElement extends BaseElement {
 
   //get index() {
   //  return Array.prototype.indexOf.call(this.parentElement.children, this);
-  //}
-
-  //_onClick(event) {
-  //  setTimeout(() => {
-  //    if (!event.defaultPrevented) {
-  //      this._tabbar.setActiveTab(this.index, { reject: false });
-  //    }
-  //  });
   //}
 
   //_loadPageElement(parent, page) {
