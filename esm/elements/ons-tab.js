@@ -224,7 +224,7 @@ export default class TabElement extends BaseElement {
         this._applyDefaultClass();
         break;
       case 'modifier':
-        this._applyModifier(last, current);
+        this._applyModifier(last);
         break;
       case 'icon':
         this._iconPropertiesTouched = true;
@@ -281,6 +281,7 @@ export default class TabElement extends BaseElement {
 
   _onSlotChange() {
     this._compile();
+    this._applyModifier('');
     this._applyAutoStyling();
   }
 
@@ -405,8 +406,8 @@ export default class TabElement extends BaseElement {
     }
   }
 
-  _applyModifier(last, current) {
-    ModifierUtil.onModifierChanged(last, current, this, scheme);
+  _applyModifier(last = '') {
+    ModifierUtil.onModifierChanged(last, this.getAttribute('modifier'), this, scheme);
     autoStyle.restoreModifier(this);
   }
 
