@@ -23,6 +23,11 @@ import contentReady from '../ons/content-ready.js';
 
 let autoPrefix = 'fa'; // FIXME: To be removed in v3
 
+const template = document.createElement('template');
+template.innerHTML = `
+  <!-- <slot></slot> -->
+`;
+
 /**
  * @element ons-icon
  * @category visual
@@ -121,13 +126,30 @@ export default class IconElement extends BaseElement {
   constructor() {
     super();
 
-    contentReady(this, () => {
-      this._compile();
-    });
+    this._connectedOnce = false;
+
+    this._createShadow();
   }
 
+  connectedCallback() {
+    if (!this._connectedOnce) {
+      this._connectedOnce = true;
+
+      this._upgradeProperties();
+    }
+  }
+
+  disconnectedCallback() {
+
+  }
+
+  //_onSlotChange() {
+  //}
+
   static get observedAttributes() {
-    return ['icon', 'size', 'modifier', 'class'];
+    return ['icon', 'size', 'modifier'
+    //'class'
+    ];
   }
 
   attributeChangedCallback(name, last, current) {
@@ -135,10 +157,67 @@ export default class IconElement extends BaseElement {
     this._update();
   }
 
-  _compile() {
-    autoStyle.prepare(this);
-    this._update();
+  ////////////////////////////////////////////////////////////////////////////////
+  // PUBLIC METHODS
+  ////////////////////////////////////////////////////////////////////////////////
+
+  get icon() {
+    return this.getAttribute('icon');
   }
+
+  set icon(value) {
+    if (value === undefined || value === null) {
+      this.removeAttribute('icon');
+    } else {
+      this.setAttribute('icon', value);
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // PRIVATE METHODS
+  ////////////////////////////////////////////////////////////////////////////////
+
+  _createShadow() {
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    //this.shadowRoot.querySelector('slot')
+    //  .addEventListener('slotchange', () => this._onSlotChange());
+  }
+
+  _upgradeProperties() {
+    ['icon']
+      .forEach(property => {
+        if (this.hasOwnProperty(property)) {
+          const value = this[property];
+          delete this[property];
+          this[property] = value;
+        }
+      });
+  }
+
+  // JUNK
+
+  //constructor() {
+  //  super();
+
+  //  contentReady(this, () => {
+  //    this._compile();
+  //  });
+  //}
+
+  //static get observedAttributes() {
+  //  return ['icon', 'size', 'modifier', 'class'];
+  //}
+
+  //attributeChangedCallback(name, last, current) {
+  //  this._cleanClassAttribute(name === 'icon' ? last : this.getAttribute('icon'), name === 'modifier' ? last : undefined);
+  //  this._update();
+  //}
+
+  //_compile() {
+  //  autoStyle.prepare(this);
+  //  this._update();
+  //}
 
   _update() {
     const {classList, style} = this._buildClassAndStyle(this._parseAttr('icon'), this._parseAttr('size'));

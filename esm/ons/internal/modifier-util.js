@@ -79,7 +79,7 @@ export default class ModifierUtil {
       const targetElements = !selector || util.match(element, selector)
         ? [element]
         : Array.prototype.filter.call(
-            element.querySelectorAll(selector),
+            element.shadowRoot.querySelectorAll(selector),
             targetElement => !util.findParent(targetElement, element.tagName, parent => parent === element)
           );
 
