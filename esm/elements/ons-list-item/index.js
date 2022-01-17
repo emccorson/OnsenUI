@@ -44,6 +44,11 @@ const _animatorDict = {
   'none': ListItemAnimator
 };
 
+const template = document.createElement('template');
+template.innerHTML = `
+  <slot></slot>
+`;
+
 /**
  * @element ons-list-item
  * @category list
@@ -170,6 +175,13 @@ export default class ListItemElement extends BaseElement {
   constructor() {
     super();
 
+    this._connectedOnce = false;
+
+    this.attachShadow({mode: 'open'});
+    this.shadowRoot.appendChild(template.content.cloneNode(true));
+    this.shadowRoot.querySelector('slot')
+      .addEventListener('slotchange', this._onSlotChange.bind(this));
+
     util.defineBooleanProperty(this, 'expanded');
 
     this._animatorFactory = this._updateAnimatorFactory();
@@ -178,18 +190,21 @@ export default class ListItemElement extends BaseElement {
     // show and hide functions for Vue hidable mixin
     this.show = this.showExpansion;
     this.hide = this.hideExpansion;
-
-    contentReady(this, () => {
-      this._compile();
-    });
   }
 
   connectedCallback() {
-    contentReady(this, () => {
-      this._setupListeners(true);
-      this._originalBackgroundColor = this.style.backgroundColor;
-      this._tapped = false;
-    });
+    if (!this._connectedOnce) {
+      this._connectedOnce = true;
+
+      this.classList.add(defaultClassName);
+      autoStyle.prepare(this);
+
+      this._compile(); // in case of empty element
+    }
+
+    this._setupListeners(true);
+    this._originalBackgroundColor = this.style.backgroundColor;
+    this._tapped = false;
   }
 
   disconnectedCallback() {
@@ -197,7 +212,7 @@ export default class ListItemElement extends BaseElement {
   }
 
   static get observedAttributes() {
-    return ['modifier', 'class', 'ripple', 'animation', 'expanded'];
+    return ['modifier', 'class', 'ripple', 'animation', 'expanded', 'expandable'];
   }
 
   attributeChangedCallback(name, last, current) {
@@ -216,6 +231,12 @@ export default class ListItemElement extends BaseElement {
         break;
       case 'expanded':
         this._animateExpansion();
+        break;
+      case 'expandable':
+        if (!this.classList.contains('list-item--expandable')) {
+          this.classList.add('list-item--expandable');
+        }
+        this._compile();
         break;
     }
   }
@@ -274,6 +295,11 @@ export default class ListItemElement extends BaseElement {
   // PRIVATE METHODS
   ////////////////////////////////////////////////////////////////////////////////
 
+  _onSlotChange() {
+    this._compile();
+    ModifierUtil.initModifier(this, scheme);
+  }
+
   /**
    * Compiles the list item.
    *
@@ -291,106 +317,140 @@ export default class ListItemElement extends BaseElement {
    * See the tests for examples.
    */
   _compile() {
-    autoStyle.prepare(this);
-    this.classList.add(defaultClassName);
+    let topContent = this; // where .left, .center, .right etc. should go
 
-    let top, expandableContent;
-    let topContent = [];
-    Array.from(this.childNodes).forEach(node => {
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        topContent.push(node);
-      } else if (node.classList.contains('top')) {
-        top = node;
-      } else if (node.classList.contains('expandable-content')) {
-        expandableContent = node;
-      } else {
-        topContent.push(node);
+    if (this.expandable) {
+      let tops = this.querySelectorAll(':scope > div.top');
+
+      let top;
+      switch (tops.length) {
+        case 0:
+          top = document.createElement('div');
+          top.classList.add('top');
+          this.insertBefore(top, this.firstChild);
+          break;
+
+        case 1:
+          top = tops[0];
+          break;
+
+        default:
+          tops[0].remove();
+          top = tops[1];
+          break;
       }
 
-      if (node.nodeName !== 'ONS-RIPPLE') {
-        node.remove();
+      topContent = top;
+      this._topElement = top;
+
+      if (!top.classList.contains('list-item__top')) {
+        top.classList.add('list-item__top');
       }
-    });
-    topContent = top ? Array.from(top.childNodes) : topContent;
 
-    let left, right, center;
-    const centerContent = [];
-    topContent.forEach(node => {
-      if (node.nodeType !== Node.ELEMENT_NODE) {
-        centerContent.push(node);
-      } else if (node.classList.contains('left')) {
-        left = node;
-      } else if (node.classList.contains('right')) {
-        right = node;
-      } else if (node.classList.contains('center')) {
-        center = node;
-      } else {
-        centerContent.push(node);
+
+      const expandableContents = this.querySelectorAll(':scope > div.expandable-content');
+      let expandableContent;
+      switch (expandableContents.length) {
+        case 0:
+          expandableContent = document.createElement('div');
+          expandableContent.classList.add('expandable-content');
+          this.insertBefore(expandableContent, this.firstChild);
+          break;
+
+        case 1:
+          expandableContent = expandableContents[0];
+          break;
+
+        default:
+          expandableContents[0].remove();
+          expandableContent = expandableContents[1];
+          break;
       }
-    });
+      this._expandableContentElement = expandableContent;
 
-    if (this.hasAttribute('expandable')) {
-      this.classList.add('list-item--expandable');
-
-      if (!top) {
-        top = document.createElement('div');
-        top.classList.add('top');
-      }
-      top.classList.add('list-item__top');
-      this.appendChild(top);
-      this._top = top;
-
-      if (expandableContent) {
+      if (!expandableContent.classList.contains('list-item__expandable-content')) {
         expandableContent.classList.add('list-item__expandable-content');
-        this.appendChild(expandableContent);
       }
 
-      if (!right) {
-        right = document.createElement('div');
-        right.classList.add('list-item__right', 'right');
 
-        // We cannot use a pseudo-element for this chevron, as we cannot animate it using
-        // JS. So, we make a chevron span instead.
-        const chevron = document.createElement('span');
-        chevron.classList.add('list-item__expand-chevron');
-        right.appendChild(chevron);
-      }
-
-      // The case where the list item should already start expanded.
-      // Adding the class early stops the animation from running at startup.
-      if (this.expanded) {
-        this.classList.add('list-item--expanded');
-      }
-    } else {
-      top = this;
+      Array.from(this.childNodes)
+        .filter(node =>
+          node !== top && !node.classList?.contains('expandable-content') && node.nodeName !== 'ONS-RIPPLE')
+        .forEach(node => top.appendChild(node));
     }
 
-    if (!center) {
-      center = document.createElement('div');
-      center.classList.add('center');
-      centerContent.forEach(node => center.appendChild(node));
-    }
-    center.classList.add('list-item__center');
-    top.appendChild(center);
-
-    if (left) {
+    const left = topContent.querySelector(':scope > div.left');
+    if (left && !left.classList.contains('list-item__left')) {
       left.classList.add('list-item__left');
-      top.appendChild(left);
     }
-    if (right) {
+
+    const rights = topContent.querySelectorAll(':scope > div.right');
+    let right;
+    switch (rights.length) {
+      case 0:
+        if (this.expandable) {
+          // We cannot use a pseudo-element for this chevron, as we cannot animate it using
+          // JS. So, we make a chevron span instead.
+          const chevron = document.createElement('span');
+          chevron.classList.add('list-item__expand-chevron');
+
+          right = document.createElement('div');
+          right.classList.add('right');
+          right.appendChild(chevron);
+
+          topContent.insertBefore(right, topContent.firstChild);
+        }
+        break;
+
+      case 1:
+        right = rights[0];
+        break;
+
+      default:
+        rights[0].remove();
+        right = rights[1];
+        break;
+    }
+
+    if (right && !right.classList.contains('list-item__right')) {
       right.classList.add('list-item__right');
-      top.appendChild(right);
     }
+
+    const centers = topContent.querySelectorAll(':scope > div.center');
+    let center;
+    switch (centers.length) {
+      case 0:
+        center = document.createElement('div');
+        center.classList.add('center');
+        topContent.insertBefore(center, topContent.firstChild);
+        break;
+
+      case 1:
+        center = centers[0];
+        break;
+
+      default:
+        centers[0].remove();
+        center = centers[1];
+        break;
+    }
+
+    if (!center.classList.contains('list-item__center')) {
+      center.classList.add('list-item__center');
+    }
+
+    Array.from(topContent.childNodes)
+      .filter(node => ![left, right, center].includes(node) && node.nodeName !== 'ONS-RIPPLE')
+      .forEach(node => center.appendChild(node));
 
     util.updateRipple(this);
-    ModifierUtil.initModifier(this, scheme);
   }
 
   _animateExpansion() {
     // Stops the animation from running in the case where the list item should start already expanded
     const expandedAtStartup = this.expanded && this.classList.contains('list-item--expanded');
 
-    if (!this.hasAttribute('expandable') || this._expanding || expandedAtStartup) {
+    if (!this.expandable || this._expanding || expandedAtStartup) {
       return;
     }
 
@@ -431,8 +491,8 @@ export default class ListItemElement extends BaseElement {
     this[action]('mouseup', this._onRelease);
     this[action]('mouseout', this._onRelease);
 
-    if (this._top) {
-      this._top[action]('click', this.toggleExpansion);
+    if (this._topElement) {
+      this._topElement[action]('click', this.toggleExpansion);
     }
   }
 

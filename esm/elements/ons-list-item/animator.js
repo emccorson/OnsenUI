@@ -45,11 +45,11 @@ export class SlideListItemAnimator extends ListItemAnimator {
     // To animate the opening of the expansion panel correctly, we need to know its
     // height. To calculate this, we set its height to auto, and then get the computed
     // height and padding. Once this is done, we set the height back to its original value.
-    const oldHeight = listItem.expandableContent.style.height;
-    const oldDisplay = listItem.expandableContent.style.display;
-    listItem.expandableContent.style.height = 'auto';
-    listItem.expandableContent.style.display = 'block';
-    const computedStyle = window.getComputedStyle(listItem.expandableContent);
+    const oldHeight = listItem._expandableContentElement.style.height;
+    const oldDisplay = listItem._expandableContentElement.style.display;
+    listItem._expandableContentElement.style.height = 'auto';
+    listItem._expandableContentElement.style.display = 'block';
+    const computedStyle = window.getComputedStyle(listItem._expandableContentElement);
 
     const expansionOpenTransition = [
       { height: 0, paddingTop: 0, paddingBottom: 0 },
@@ -62,12 +62,12 @@ export class SlideListItemAnimator extends ListItemAnimator {
     const iconOpenTransition = [{transform: 'rotate(45deg)'}, {transform: 'rotate(225deg)'}];
 
     // Now that we have the values we need, reset the height back to its original state
-    listItem.expandableContent.style.height = oldHeight;
+    listItem._expandableContentElement.style.height = oldHeight;
 
-    animit(listItem.expandableContent, { duration: this.duration, property: 'height padding-top padding-bottom' })
+    animit(listItem._expandableContentElement, { duration: this.duration, property: 'height padding-top padding-bottom' })
       .default(...(shouldOpen ? expansionOpenTransition : expansionOpenTransition.reverse()))
       .play(() => {
-        listItem.expandableContent.style.display = oldDisplay;
+        listItem._expandableContentElement.style.display = oldDisplay;
         callback && callback();
       });
 
