@@ -15,25 +15,8 @@ limitations under the License.
 
 */
 
-let readyMap, queueMap;
-
-function isContentReady(element) {
-  if (element.childNodes.length > 0) {
-    setContentReady(element);
-  }
-  return readyMap.has(element);
-}
-
-function setContentReady(element) {
-  readyMap.set(element, true);
-}
-
-function addCallback(element, fn) {
-  if (!queueMap.has(element)) {
-    queueMap.set(element, []);
-  }
-  queueMap.get(element).push(fn);
-}
+let queueMap = new WeakMap();
+let readyMap = new WeakMap();
 
 function consumeQueue(element) {
   const callbacks = queueMap.get(element, []) || [];
@@ -41,28 +24,23 @@ function consumeQueue(element) {
   callbacks.forEach(callback => callback());
 }
 
+function setContentReady(element) {
+  readyMap.set(element, true);
+  consumeQueue(element);
+}
+
 export default function contentReady(element, fn = () => {}) {
-  if (readyMap === undefined) {
-    readyMap = new WeakMap();
-    queueMap = new WeakMap();
+  if (!queueMap.has(element)) {
+    queueMap.set(element, []);
   }
+  queueMap.get(element).push(fn);
 
-  addCallback(element, fn);
-
-  if (isContentReady(element)) {
+  if (readyMap.has(element)) {
     consumeQueue(element);
-    return;
+  } else if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    // use setImmediate to allow contentReady to be used in constructor
+    setImmediate(() => setContentReady(element));
+  } else {
+    document.addEventListener('readystatechange', () => setContentReady(element), {once: true});
   }
-
-  const observer = new MutationObserver(changes => {
-    setContentReady(element);
-    consumeQueue(element);
-  });
-  observer.observe(element, {childList: true, characterData: true});
-
-  // failback for elements has empty content.
-  setImmediate(() => {
-    setContentReady(element);
-    consumeQueue(element);
-  });
 }
