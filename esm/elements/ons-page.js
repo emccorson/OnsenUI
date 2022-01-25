@@ -150,11 +150,11 @@ export default class PageElement extends BaseElement {
     this._deriveHooks();
 
     this._defaultClassName = defaultClassName;
-    this.classList.add(defaultClassName);
 
     this._initialized = false;
 
     contentReady(this, () => {
+      this.classList.add(defaultClassName);
       this._compile();
 
       this._isShown = false;
