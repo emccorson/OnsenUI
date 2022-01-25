@@ -83,9 +83,9 @@ export default class FabElement extends BaseElement {
     // The following statements can be executed before contentReady
     // since these do not access the children
     this._hide();
-    this.classList.add(defaultClassName);
 
     contentReady(this, () => {
+      this.classList.add(defaultClassName);
       this._compile();
     });
   }
