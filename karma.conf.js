@@ -16,6 +16,7 @@ module.exports = function(config) {
     files: [
       'js/onsenui.js',
       'test/unit/setup.js',
+      'test/unit/test-utils.js',
       `test/unit/browser-${global.KARMA_BROWSER}.js`, // no error occurs even if not found
       global.KARMA_DISABLE_WARNINGS ? 'test/unit/disable-warnings.js' : null,
       global.KARMA_SPEC_FILES || 'esm/**/*.spec.js',

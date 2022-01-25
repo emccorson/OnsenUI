@@ -2,17 +2,10 @@
 
 describe('OnsPageElement', () => {
 
-  const createElement = elementString => {
-    return new Promise(resolve => {
-      const element = ons._util.createElement(elementString);
-      setImmediate(() => resolve(element));
-    });
-  }
-
   let element;
 
   beforeEach(() => {
-    return createElement('<ons-page>content</ons-page>')
+    return testUtils.createElement('<ons-page>content</ons-page>')
       .then(e => element = e);
   });
 
@@ -33,7 +26,7 @@ describe('OnsPageElement', () => {
   });
 
   it('should fill class name automatically on content wrapper element', () => {
-    return createElement(`<ons-page>
+    return testUtils.createElement(`<ons-page>
       <div class="content">...</div>
     </ons-page>`).then(page => {
 
@@ -42,7 +35,7 @@ describe('OnsPageElement', () => {
   });
 
   it('should fill class name automatically on background element', () => {
-    return createElement(`<ons-page>
+    return testUtils.createElement(`<ons-page>
       <div class="background" id="test">...</div>
     </ons-page>`).then(page => {
 
@@ -51,7 +44,7 @@ describe('OnsPageElement', () => {
   });
 
   it('should create background element automatically', () => {
-    return createElement(`<ons-page>
+    return testUtils.createElement(`<ons-page>
       <div class="page__content">...</div>
     </ons-page>`).then(page => {
 
@@ -60,7 +53,7 @@ describe('OnsPageElement', () => {
   });
 
   it('should have hidden background if is a wrapper', () => {
-    return createElement(`
+    return testUtils.createElement(`
       <ons-page>
         <div class="page__background"></div>
         <ons-page id="inner"><div class="page__background"></div></ons-page>
@@ -72,7 +65,7 @@ describe('OnsPageElement', () => {
   });
 
   it('should add an extra class if there is a bottom toolbar', () => {
-    return createElement(`<ons-page>
+    return testUtils.createElement(`<ons-page>
       <div class="page__content">...</div>
       <ons-bottom-toolbar></ons-bottom-toolbar>
     </ons-page>`).then(page => {
@@ -355,7 +348,7 @@ describe('OnsPageElement', () => {
     });
 
     it('adds elements in correct order', () => {
-      return createElement(`
+      return testUtils.createElement(`
         <div>
           <ons-page>
             <span>test</span>
@@ -398,7 +391,7 @@ describe('OnsPageElement', () => {
   describe('autoStyling', () => {
     it('adds \'material\' modifier on Android', () => {
       ons.platform.select('android');
-      createElement('<ons-page>content</ons-page>').then(e => {
+      testUtils.createElement('<ons-page>content</ons-page>').then(e => {
         expect(e.getAttribute('modifier')).to.equal('material');
         ons.platform.select('');
       });
