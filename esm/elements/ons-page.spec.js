@@ -1,10 +1,19 @@
 'use strict';
 
 describe('OnsPageElement', () => {
+
+  const createElement = elementString => {
+    return new Promise(resolve => {
+      const element = ons._util.createElement(elementString);
+      setImmediate(() => resolve(element));
+    });
+  }
+
   let element;
 
   beforeEach(() => {
-    element = ons._util.createElement('<ons-page>content</ons-page>');
+    return createElement('<ons-page>content</ons-page>')
+      .then(e => element = e);
   });
 
   afterEach(() => {
@@ -24,45 +33,52 @@ describe('OnsPageElement', () => {
   });
 
   it('should fill class name automatically on content wrapper element', () => {
-    const page = ons._util.createElement(`<ons-page>
+    return createElement(`<ons-page>
       <div class="content">...</div>
-    </ons-page>`);
+    </ons-page>`).then(page => {
 
-    expect(page.querySelector('.page__content').textContent).to.be.equal('...');
+      expect(page.querySelector('.page__content').textContent).to.be.equal('...');
+    });
   });
 
   it('should fill class name automatically on background element', () => {
-    const page = ons._util.createElement(`<ons-page>
+    return createElement(`<ons-page>
       <div class="background" id="test">...</div>
-    </ons-page>`);
+    </ons-page>`).then(page => {
 
-    expect(page.querySelector('.page__background').id).to.be.equal('test');
+      expect(page.querySelector('.page__background').id).to.be.equal('test');
+    });
   });
 
   it('should create background element automatically', () => {
-    const page = ons._util.createElement(`<ons-page>
+    return createElement(`<ons-page>
       <div class="page__content">...</div>
-    </ons-page>`);
-    expect(page.querySelector('.page__background')).to.be.ok;
+    </ons-page>`).then(page => {
+
+      expect(page.querySelector('.page__background')).to.be.ok;
+    });
   });
 
   it('should have hidden background if is a wrapper', () => {
-    const page = ons._util.createElement(`
+    return createElement(`
       <ons-page>
         <div class="page__background"></div>
         <ons-page id="inner"><div class="page__background"></div></ons-page>
-      </ons-page>`);
-    expect(page.className).to.contain('page--wrapper');
-    expect(page.querySelector('#inner').className).not.to.contain('page--wrapper');
+      </ons-page>`).then(page => {
+
+      expect(page.className).to.contain('page--wrapper');
+      expect(page.querySelector('#inner').className).not.to.contain('page--wrapper');
+    });
   });
 
   it('should add an extra class if there is a bottom toolbar', () => {
-    const page = ons._util.createElement(`<ons-page>
+    return createElement(`<ons-page>
       <div class="page__content">...</div>
       <ons-bottom-toolbar></ons-bottom-toolbar>
-    </ons-page>`);
+    </ons-page>`).then(page => {
 
-    expect(page.className).to.contain('page-with-bottom-toolbar');
+      expect(page.className).to.contain('page-with-bottom-toolbar');
+    });
   });
 
   describe('#attachedCallback()', () => {
@@ -339,12 +355,19 @@ describe('OnsPageElement', () => {
     });
 
     it('adds elements in correct order', () => {
-      const div = document.createElement('div');
-      div.innerHTML = '<ons-page><span>test</span><ons-toolbar></ons-toolbar></ons-page>';
-      const elements = div.children[0].children;
-      expect(elements[0].tagName.toLowerCase()).to.equal('ons-toolbar');
-      expect(elements[1].className).to.equal('page__background');
-      expect(elements[2].className).to.equal('page__content');
+      return createElement(`
+        <div>
+          <ons-page>
+            <span>test</span>
+            <ons-toolbar></ons-toolbar>
+          </ons-page>
+        </div>
+      `).then(div => {
+        const elements = div.children[0].children;
+        expect(elements[0].tagName.toLowerCase()).to.equal('ons-toolbar');
+        expect(elements[1].className).to.equal('page__background');
+        expect(elements[2].className).to.equal('page__content');
+      });
     });
   });
 
@@ -375,9 +398,10 @@ describe('OnsPageElement', () => {
   describe('autoStyling', () => {
     it('adds \'material\' modifier on Android', () => {
       ons.platform.select('android');
-      const e = ons._util.createElement('<ons-page>content</ons-page>');
-      expect(e.getAttribute('modifier')).to.equal('material');
-      ons.platform.select('');
+      createElement('<ons-page>content</ons-page>').then(e => {
+        expect(e.getAttribute('modifier')).to.equal('material');
+        ons.platform.select('');
+      });
     });
   });
 
