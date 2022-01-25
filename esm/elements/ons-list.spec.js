@@ -48,9 +48,10 @@ describe('ons-list', () => {
   describe('autoStyling', () => {
     it('adds \'material\' modifier on Android', () => {
       ons.platform.select('android');
-      const e = document.createElement('ons-list');
-      expect(e.getAttribute('modifier')).to.equal('material');
-      ons.platform.select('');
+      testUtils.createElement('ons-list').then(e => {
+        expect(e.getAttribute('modifier')).to.equal('material');
+        ons.platform.select('');
+      });
     });
   });
 });
