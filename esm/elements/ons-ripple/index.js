@@ -113,13 +113,15 @@ export default class RippleElement extends BaseElement {
     this._onDragStart = this._onDragStart.bind(this);
     this._onRelease = this._onRelease.bind(this);
 
-    contentReady(this, () => this._compile());
+    contentReady(this, () => {
+      this._compile();
+
+      ['color', 'center', 'start-radius', 'background', 'modifier'].forEach(e => {
+        this.attributeChangedCallback(e, null, this.getAttribute(e));
+      });
+    });
 
     this._animator = new Animator();
-
-    ['color', 'center', 'start-radius', 'background', 'modifier'].forEach(e => {
-      this.attributeChangedCallback(e, null, this.getAttribute(e));
-    });
   }
 
   _compile() {

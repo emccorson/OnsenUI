@@ -219,7 +219,7 @@ describe('OnsListItemElement', () => {
   });
 
   describe('autoStyling', () => {
-    it.skip('adds \'material\' modifiers and effects on Android if tappable', () => {
+    it('adds \'material\' modifiers and effects on Android if tappable', () => {
       ons.platform.select('android');
       return testUtils.createElement('<ons-list-item tappable>Content</ons-list-item>').then(e => {
         expect(e.getAttribute('modifier')).to.equal('material');
