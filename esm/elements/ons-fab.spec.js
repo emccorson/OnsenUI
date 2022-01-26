@@ -155,10 +155,11 @@ describe('OnsFabElement', () => {
   describe('autoStyling', () => {
     it('adds \'material\' effects on Android', () => {
       ons.platform.select('android');
-      const e = ons._util.createElement('<ons-fab> </ons-fab>');
-      expect(e.hasAttribute('ripple')).to.be.true;
-      expect(e.firstChild.tagName.toLowerCase()).to.equal('ons-ripple');
-      ons.platform.select('');
+      return testUtils.createElement('<ons-fab> </ons-fab>').then(e => {
+        expect(e.hasAttribute('ripple')).to.be.true;
+        expect(e.firstChild.tagName.toLowerCase()).to.equal('ons-ripple');
+        ons.platform.select('');
+      });
     });
   });
 });
