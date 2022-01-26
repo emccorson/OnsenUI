@@ -93,7 +93,9 @@ describe('OnsRippleElement', () => {
       const spy = chai.spy.on(ons.elements.Ripple.prototype, 'attributeChangedCallback'),
         _ = new ons.elements.Ripple();
 
-      expect(spy).to.have.been.called.exactly(attributes.length);
+      contentReady(_, () => {
+        expect(spy).to.have.been.called.exactly(attributes.length)
+      });
     });
 
     it('sets the color of the wave based on the "color" attribute', () => {
